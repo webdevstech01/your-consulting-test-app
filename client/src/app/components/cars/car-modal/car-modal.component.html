@@ -1,0 +1,92 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    {{ carToEdit ? "Modificare" : "Adăugare" }} mașină
+  </h4>
+</div>
+
+<div class="modal-body">
+  <div class="row">
+    <label for="car-brand" class="col-3 control-label">Marcă*</label>
+    <div class="col-9">
+      <input
+        id="car-brand"
+        class="form-control"
+        placeholder="Marcă..."
+        maxlength="255"
+        [(ngModel)]="car.brand"
+      />
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="car-model" class="col-3 control-label">Model*</label>
+    <div class="col-9">
+      <input
+        id="car-model"
+        class="form-control"
+        placeholder="Model..."
+        maxlength="255"
+        [(ngModel)]="car.model"
+      />
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="car-year" class="col-3 control-label">
+      Anul fabricației*
+    </label>
+    <div class="col-4">
+      <input
+        id="car-year"
+        type="number"
+        class="form-control"
+        placeholder="Anul..."
+        [(ngModel)]="car.manufactureYear"
+      />
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="car-capacity" class="col-3 control-label">
+      Capacitate cilindrică*
+    </label>
+    <div class="col-4">
+      <input
+        id="car-capacity"
+        type="number"
+        class="form-control"
+        placeholder="cm³..."
+        [(ngModel)]="car.engineCapacity"
+        (ngModelChange)="calculateTax()"
+      />
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="car-tax" class="col-3 control-label"> Taxă de impozit* </label>
+    <div class="col-4">
+      <input
+        id="car-tax"
+        type="number"
+        class="form-control"
+        placeholder="Calculată automat"
+        [ngModel]="car.tax"
+        readonly
+      />
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-success" (click)="save()">
+    Salvează
+  </button>
+
+  <button
+    type="button"
+    class="btn btn-outline-secondary"
+    (click)="activeModal.dismiss()"
+  >
+    Renunță
+  </button>
+</div>

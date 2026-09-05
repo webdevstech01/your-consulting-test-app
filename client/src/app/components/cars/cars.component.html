@@ -1,0 +1,146 @@
+﻿<div class="col-12 mt-2 width-1220">
+  <div class="row">
+    <div class="col-4">
+      <button class="btn btn-primary btn-sm" type="button" (click)="addCar()">
+        <fa-icon [icon]="faPlus"></fa-icon> Adaugă
+      </button>
+    </div>
+    <div class="col-4"><h4 class="text-center">Mașini</h4></div>
+    <div class="col-4"></div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 width-1220">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr class="table-bordered">
+            <th width="60px" rowspan="2">Nr. Crt.</th>
+            <th>Marcă</th>
+            <th>Model</th>
+            <th width="120px">Anul fabricației</th>
+            <th width="160px">Capacitate cilindrică</th>
+            <th width="120px">Taxă de impozit</th>
+            <th rowspan="2" width="70px"></th>
+          </tr>
+          <tr>
+            <th>
+              <input
+                class="form-control input-xs"
+                placeholder="Căutare..."
+                aria-label="Căutare marcă"
+                [(ngModel)]="filters.brand"
+                (ngModelChange)="onFiltersChange()"
+              />
+            </th>
+            <th>
+              <input
+                class="form-control input-xs"
+                placeholder="Căutare..."
+                aria-label="Căutare model"
+                [(ngModel)]="filters.model"
+                (ngModelChange)="onFiltersChange()"
+              />
+            </th>
+            <th>
+              <input
+                class="form-control input-xs"
+                placeholder="Căutare..."
+                aria-label="Căutare an"
+                [(ngModel)]="filters.manufactureYear"
+                (ngModelChange)="onFiltersChange()"
+              />
+            </th>
+            <th>
+              <input
+                class="form-control input-xs"
+                placeholder="Căutare..."
+                aria-label="Căutare capacitate"
+                [(ngModel)]="filters.engineCapacity"
+                (ngModelChange)="onFiltersChange()"
+              />
+            </th>
+            <th>
+              <input
+                class="form-control input-xs"
+                placeholder="Căutare..."
+                aria-label="Căutare taxă"
+                [(ngModel)]="filters.tax"
+                (ngModelChange)="onFiltersChange()"
+              />
+            </th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+
+    <div class="col-12 position-relative width-1220">
+      <div
+        id="view"
+        class="view-scroll-cars"
+        style="max-height: 60vh"
+        [scrollWindow]="false"
+        (scroll)="showTopButton()"
+        infiniteScroll
+        [infiniteScrollDistance]="2"
+        [infiniteScrollThrottle]="30"
+        (scrolled)="onScrollDown()"
+      >
+        <button
+          type="button"
+          id="back-top"
+          [class.show]="showBackTop"
+          (click)="onScrollTop()"
+          aria-label="Înapoi sus"
+        >
+          <fa-icon [icon]="faChevronUp"></fa-icon>
+        </button>
+        <table
+          class="table table-hover table-striped table-bordered font-14 p-0"
+        >
+          <tbody *ngIf="filteredCars as visibleCars">
+            <tr
+              *ngFor="let car of visibleCars.slice(0, limit); let i = index"
+              (dblclick)="editCar(car)"
+            >
+              <td width="60px" class="text-center">{{ i + 1 }}</td>
+              <td>{{ car.brand }}</td>
+              <td>{{ car.model }}</td>
+              <td width="120px" class="text-center">
+                {{ car.manufactureYear }}
+              </td>
+              <td width="160px" class="text-center">
+                {{ car.engineCapacity }} cm³
+              </td>
+              <td width="120px" class="text-center">{{ car.tax }} lei</td>
+              <td width="35px" class="text-center">
+                <button
+                  type="button"
+                  class="btn btn-link p-0"
+                  (click)="editCar(car)"
+                  (dblclick)="$event.stopPropagation()"
+                  aria-label="Modificare"
+                >
+                  <fa-icon class="text-primary" [icon]="faEdit"></fa-icon>
+                </button>
+              </td>
+              <td width="35px" class="text-center">
+                <button
+                  type="button"
+                  class="btn btn-link p-0"
+                  (click)="deleteCar(car)"
+                  (dblclick)="$event.stopPropagation()"
+                  aria-label="Ștergere"
+                >
+                  <fa-icon class="text-danger" [icon]="faTrashAlt"></fa-icon>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="!visibleCars.length" class="text-center fw-bold">
+              <td colspan="8">{{ cars.length ? 'Nicio mașină nu corespunde filtrelor.' : 'Date inexistente!' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,78 @@
+<div class="modal-header">
+  <h4 class="modal-title">
+    {{ personToEdit ? "Modificare" : "Adăugare" }} persoană
+  </h4>
+</div>
+
+<div class="modal-body">
+  <div class="row">
+    <label for="person-last-name" class="col-3 control-label"> Nume* </label>
+    <div class="col-9">
+      <input
+        id="person-last-name"
+        class="form-control"
+        placeholder="Nume..."
+        maxlength="255"
+        [(ngModel)]="person.lastName"
+      />
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="person-first-name" class="col-3 control-label">
+      Prenume*
+    </label>
+    <div class="col-9">
+      <input
+        id="person-first-name"
+        class="form-control"
+        placeholder="Prenume..."
+        maxlength="255"
+        [(ngModel)]="person.firstName"
+      />
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="person-cnp" class="col-3 control-label">CNP*</label>
+    <div class="col-9">
+      <input
+        id="person-cnp"
+        type="text"
+        inputmode="numeric"
+        class="form-control"
+        placeholder="CNP..."
+        maxlength="13"
+        [(ngModel)]="person.cnp"
+        (ngModelChange)="calculateAge()"
+      />
+    </div>
+  </div>
+
+  <div class="row">
+    <label for="person-age" class="col-3 control-label">Vârsta*</label>
+    <div class="col-4">
+      <input
+        id="person-age"
+        type="number"
+        class="form-control"
+        placeholder="Calculată automat"
+        [ngModel]="person.age"
+        readonly
+      />
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-success" (click)="save()">
+    Salvează
+  </button>
+  <button
+    type="button"
+    class="btn btn-outline-secondary"
+    (click)="activeModal.dismiss()"
+  >
+    Renunță
+  </button>
+</div>
