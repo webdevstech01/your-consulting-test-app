@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CarModalComponent } from './car-modal/car-modal.component';
 import {
@@ -26,13 +26,14 @@ interface Car {
   templateUrl: './cars.component.html',
   styleUrls: ['./cars.component.scss'],
 })
-export class CarsComponent implements OnInit {
+export class CarsComponent implements OnInit, OnDestroy {
   faPlus = faPlus;
   faEdit = faEdit;
   faTrashAlt = faTrashAlt;
   faChevronUp = faChevronUp;
   limit = 70;
   showBackTop = false;
+
   filters = {
     brand: '',
     model: '',
@@ -41,25 +42,19 @@ export class CarsComponent implements OnInit {
     tax: '',
   };
 
-  get filteredCars(): Car[] {
-    const matches = (value: string | number, search: string): boolean =>
-      String(value)
-        .toLocaleLowerCase()
-        .includes(search.trim().toLocaleLowerCase());
-
-    return this.cars.filter(
-      (car) =>
-        matches(car.brand, this.filters.brand) &&
-        matches(car.model, this.filters.model) &&
-        matches(car.manufactureYear, this.filters.manufactureYear) &&
-        matches(car.engineCapacity, this.filters.engineCapacity) &&
-        matches(car.tax, this.filters.tax),
-    );
-  }
+  private filterTimer?: ReturnType<typeof setTimeout>;
+  private requestVersion = 0;
 
   onFiltersChange(): void {
+    clearTimeout(this.filterTimer);
+    this.requestVersion++;
+
     this.onScrollTop();
     this.showBackTop = false;
+
+    this.filterTimer = setTimeout(() => {
+      void this.loadCars();
+    }, 300);
   }
 
   cars: Car[] = [];
@@ -71,6 +66,11 @@ export class CarsComponent implements OnInit {
   ngOnInit(): void {
     SET_HEIGHT('view', 20, 'height');
     void this.loadCars();
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.filterTimer);
+    this.requestVersion++;
   }
 
   showTopButton(): void {
@@ -88,10 +88,23 @@ export class CarsComponent implements OnInit {
   }
 
   async loadCars(): Promise<void> {
+    const version = ++this.requestVersion;
+
     try {
-      const response = await axios.get<Car[]>('/api/cars');
+      const response = await axios.get<Car[]>('/api/cars', {
+        params: { ...this.filters },
+      });
+
+      if (version !== this.requestVersion) {
+        return;
+      }
+
       this.cars = response.data;
     } catch (error) {
+      if (version !== this.requestVersion) {
+        return;
+      }
+
       console.error('Failed to fetch cars:', error);
       this.toastr.error('Eroare la preluarea mașinilor.');
     }
@@ -101,24 +114,12 @@ export class CarsComponent implements OnInit {
     const modalRef = this.modalService.open(CarModalComponent, {
       size: 'lg',
       backdrop: 'static',
+      beforeDismiss: () => !modalRef.componentInstance.saving,
     });
 
-    modalRef.closed.subscribe((car: Omit<Car, 'id'>) => {
-      void this.createCar(car);
+    modalRef.closed.subscribe(() => {
+      void this.loadCars();
     });
-  }
-
-  async createCar(car: Omit<Car, 'id'>): Promise<void> {
-    try {
-      await axios.post('/api/cars', car);
-    } catch (error) {
-      console.error('Failed to create car:', error);
-      this.toastr.error('Eroare la salvarea mașinii.');
-      return;
-    }
-
-    this.toastr.success('Mașina a fost salvată.');
-    await this.loadCars();
   }
 
   async editCar(car: Car): Promise<void> {
@@ -136,26 +137,14 @@ export class CarsComponent implements OnInit {
     const modalRef = this.modalService.open(CarModalComponent, {
       size: 'lg',
       backdrop: 'static',
+      beforeDismiss: () => !modalRef.componentInstance.saving,
     });
 
     modalRef.componentInstance.carToEdit = currentCar;
 
-    modalRef.closed.subscribe((updatedCar: Omit<Car, 'id'>) => {
-      void this.updateCar(currentCar.id, updatedCar);
+    modalRef.closed.subscribe(() => {
+      void this.loadCars();
     });
-  }
-
-  async updateCar(id: number, car: Omit<Car, 'id'>): Promise<void> {
-    try {
-      await axios.put(`/api/cars/${id}`, car);
-    } catch (error) {
-      console.error('Failed to update car:', error);
-      this.toastr.error('Eroare la modificarea mașinii.');
-      return;
-    }
-
-    this.toastr.success('Mașina a fost modificată.');
-    await this.loadCars();
   }
 
   deleteCar(car: Car): void {

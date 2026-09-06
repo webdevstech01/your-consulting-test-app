@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import axios from 'axios';
 import { ToastrService } from 'ngx-toastr';
 import { faPlus, faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { SET_HEIGHT } from 'src/app/utils/utils-table';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PersonModalComponent } from './person-modal/person-modal.component';
+import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 
 interface Person {
   id: number;
@@ -12,6 +13,16 @@ interface Person {
   firstName: string;
   cnp: string;
   age: number;
+  cars: OwnedCar[];
+}
+
+interface OwnedCar {
+  id: number;
+  brand: string;
+  model: string;
+  manufactureYear: number;
+  engineCapacity: number;
+  tax: number;
 }
 
 @Component({
@@ -19,8 +30,18 @@ interface Person {
   templateUrl: './persons.component.html',
   styleUrls: ['./persons.component.scss'],
 })
-export class PersonsComponent implements OnInit {
+export class PersonsComponent implements OnInit, OnDestroy {
   persons: Person[] = [];
+
+  filters = {
+    lastName: '',
+    firstName: '',
+    cnp: '',
+    age: '',
+  };
+
+  private filterTimer?: ReturnType<typeof setTimeout>;
+  private requestVersion = 0;
 
   faPlus = faPlus;
   faEdit = faEdit;
@@ -36,38 +57,82 @@ export class PersonsComponent implements OnInit {
     void this.loadPersons();
   }
 
+  ngOnDestroy(): void {
+    clearTimeout(this.filterTimer);
+    this.requestVersion++;
+  }
+
+  onFiltersChange(): void {
+    clearTimeout(this.filterTimer);
+
+    this.requestVersion++;
+
+    this.filterTimer = setTimeout(() => {
+      void this.loadPersons();
+    }, 300);
+  }
+
   async loadPersons(): Promise<void> {
+    const version = ++this.requestVersion;
+
     try {
-      const response = await axios.get<Person[]>('/api/persons');
+      const response = await axios.get<Person[]>('/api/persons', {
+        params: { ...this.filters },
+      });
+
+      if (version !== this.requestVersion) {
+        return;
+      }
+
       this.persons = response.data;
     } catch (error) {
+      if (version !== this.requestVersion) {
+        return;
+      }
+
       console.error('Failed to fetch persons:', error);
       this.toastr.error('Eroare la preluarea persoanelor.');
     }
+  }
+
+  deletePerson(person: Person): void {
+    const modalRef = this.modalService.open(ConfirmDialogComponent, {
+      size: 'lg',
+      backdrop: 'static',
+    });
+
+    modalRef.componentInstance.title = 'Ștergere persoană';
+    modalRef.componentInstance.content =
+      'Doriți să ștergeți persoana selectată?';
+
+    modalRef.closed.subscribe(() => {
+      void this.removePerson(person.id);
+    });
+  }
+
+  async removePerson(id: number): Promise<void> {
+    try {
+      await axios.delete(`/api/persons/${id}`);
+    } catch (error) {
+      console.error('Failed to delete person:', error);
+      this.toastr.error('Eroare la ștergerea persoanei.');
+      return;
+    }
+
+    this.toastr.success('Persoana a fost ștearsă.');
+    await this.loadPersons();
   }
 
   addPerson(): void {
     const modalRef = this.modalService.open(PersonModalComponent, {
       size: 'lg',
       backdrop: 'static',
+      beforeDismiss: () => !modalRef.componentInstance.saving,
     });
 
-    modalRef.closed.subscribe((person: Omit<Person, 'id'>) => {
-      void this.createPerson(person);
+    modalRef.closed.subscribe(() => {
+      void this.loadPersons();
     });
-  }
-
-  async createPerson(person: Omit<Person, 'id'>): Promise<void> {
-    try {
-      await axios.post('/api/persons', person);
-    } catch (error) {
-      console.error('Failed to create person:', error);
-      this.toastr.error('Eroare la salvarea persoanei.');
-      return;
-    }
-
-    this.toastr.success('Persoana a fost salvată.');
-    await this.loadPersons();
   }
 
   async editPerson(person: Person): Promise<void> {
@@ -85,25 +150,13 @@ export class PersonsComponent implements OnInit {
     const modalRef = this.modalService.open(PersonModalComponent, {
       size: 'lg',
       backdrop: 'static',
+      beforeDismiss: () => !modalRef.componentInstance.saving,
     });
 
     modalRef.componentInstance.personToEdit = currentPerson;
 
-    modalRef.closed.subscribe((updatedPerson: Omit<Person, 'id'>) => {
-      void this.updatePerson(currentPerson.id, updatedPerson);
+    modalRef.closed.subscribe(() => {
+      void this.loadPersons();
     });
-  }
-
-  async updatePerson(id: number, person: Omit<Person, 'id'>): Promise<void> {
-    try {
-      await axios.put(`/api/persons/${id}`, person);
-    } catch (error) {
-      console.error('Failed to update person:', error);
-      this.toastr.error('Eroare la modificarea persoanei.');
-      return;
-    }
-
-    this.toastr.success('Persoana a fost modificată.');
-    await this.loadPersons();
   }
 }

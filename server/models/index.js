@@ -1,4 +1,4 @@
-module.exports = function getModels(sequelize, Sequelize) {
+module.exports = async function getModels(sequelize, Sequelize) {
   "use strict";
 
   const _ = require("lodash");
@@ -39,6 +39,8 @@ module.exports = function getModels(sequelize, Sequelize) {
     { path: __dirname + "/car.js", sync: true },
 
     { path: __dirname + "/person.js", sync: true },
+
+    { path: __dirname + "/junction.js", sync: true },
   ];
 
   const syncTables = [];
@@ -68,11 +70,39 @@ module.exports = function getModels(sequelize, Sequelize) {
     }
   }
 
+  // if (syncTables.length && process.env.RUN_CRON === "true") {
+  //   _.each(syncTables, (file) => {
+  //     console.info(file);
+  //     file.sync({ alter: true, logging: false });
+  //   });
+  // }
+
+  // return sequelize;
+
+  const { Person, Car, Junction } = sequelize.models;
+
+  Person.belongsToMany(Car, {
+    through: Junction,
+    as: "cars",
+    foreignKey: "id_person",
+    otherKey: "id_car",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
+  Car.belongsToMany(Person, {
+    through: Junction,
+    as: "persons",
+    foreignKey: "id_car",
+    otherKey: "id_person",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  });
+
   if (syncTables.length && process.env.RUN_CRON === "true") {
-    _.each(syncTables, (file) => {
-      console.info(file);
-      file.sync({ alter: true, logging: false });
-    });
+    for (const model of syncTables) {
+      await model.sync({ alter: true, logging: false });
+    }
   }
 
   return sequelize;

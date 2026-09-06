@@ -97,9 +97,9 @@
         <table
           class="table table-hover table-striped table-bordered font-14 p-0"
         >
-          <tbody *ngIf="filteredCars as visibleCars">
+          <tbody>
             <tr
-              *ngFor="let car of visibleCars.slice(0, limit); let i = index"
+              *ngFor="let car of cars.slice(0, limit); let i = index"
               (dblclick)="editCar(car)"
             >
               <td width="60px" class="text-center">{{ i + 1 }}</td>
@@ -135,8 +135,8 @@
                 </button>
               </td>
             </tr>
-            <tr *ngIf="!visibleCars.length" class="text-center fw-bold">
-              <td colspan="8">{{ cars.length ? 'Nicio mașină nu corespunde filtrelor.' : 'Date inexistente!' }}</td>
+            <tr *ngIf="!cars.length" class="text-center fw-bold">
+              <td colspan="8">Nu există mașini de afișat.</td>
             </tr>
           </tbody>
         </table>

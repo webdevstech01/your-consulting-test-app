@@ -1,7 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import axios from 'axios';
 
+interface CarOption {
+  id: number;
+  brand: string;
+  model: string;
+  label: string;
+}
 @Component({
   selector: 'app-person-modal',
   templateUrl: './person-modal.component.html',
@@ -15,13 +22,27 @@ export class PersonModalComponent implements OnInit {
     age: null as number | null,
   };
 
-  @Input() personToEdit?: typeof this.person;
+  availableCars: CarOption[] = [];
+  selectedCarIds: number[] = [];
+
+  @Input() personToEdit?: typeof this.person & {
+    id: number;
+    cars?: { id: number }[];
+  };
+
+  saving = false;
+  loadingCars = true;
+  carsLoadFailed = false;
 
   ngOnInit(): void {
     if (this.personToEdit) {
       this.person = { ...this.personToEdit };
+      this.selectedCarIds = this.personToEdit.cars?.map((car) => car.id) ?? [];
+
       this.calculateAge();
     }
+
+    void this.loadCars();
   }
 
   constructor(
@@ -70,7 +91,11 @@ export class PersonModalComponent implements OnInit {
     this.person.age = age;
   }
 
-  save(): void {
+  async save(): Promise<void> {
+    if (this.saving || this.loadingCars || this.carsLoadFailed) {
+      return;
+    }
+
     const lastName = this.person.lastName.trim();
     const firstName = this.person.firstName.trim();
     const cnp = this.person.cnp.trim();
@@ -108,11 +133,59 @@ export class PersonModalComponent implements OnInit {
       return;
     }
 
-    this.activeModal.close({
+    if (this.selectedCarIds.length === 0) {
+      this.toastr.error('Selectați cel puțin o mașină.');
+      return;
+    }
+
+    const payload = {
       lastName,
       firstName,
       cnp,
       age: this.person.age,
-    });
+      carIds: [...this.selectedCarIds],
+    };
+
+    this.saving = true;
+
+    try {
+      if (this.personToEdit?.id !== undefined) {
+        await axios.put(`/api/persons/${this.personToEdit.id}`, payload);
+      } else {
+        await axios.post('/api/persons', payload);
+      }
+    } catch (error) {
+      console.error('Failed to save person:', error);
+      this.toastr.error('Eroare la salvarea persoanei.');
+      return;
+    } finally {
+      this.saving = false;
+    }
+
+    this.toastr.success('Persoana a fost salvată.');
+    this.activeModal.close();
+  }
+
+  async loadCars(): Promise<void> {
+    this.loadingCars = true;
+    this.carsLoadFailed = false;
+
+    try {
+      const response =
+        await axios.get<{ id: number; brand: string; model: string }[]>(
+          '/api/caars',
+        );
+
+      this.availableCars = response.data.map((car) => ({
+        ...car,
+        label: `${car.brand} ${car.model} (#${car.id})`,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch car options:', error);
+      this.carsLoadFailed = true;
+      this.toastr.error('Eroare la preluarea mașinilor.');
+    } finally {
+      this.loadingCars = false;
+    }
   }
 }

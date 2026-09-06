@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import axios from 'axios';
 
 @Component({
   selector: 'app-car-modal',
@@ -16,7 +17,10 @@ export class CarModalComponent implements OnInit {
     tax: null as number | null,
   };
 
-  @Input() carToEdit?: typeof this.car;
+  @Input() carToEdit?: typeof this.car & {
+    id: number;
+  };
+  saving = false;
 
   ngOnInit(): void {
     if (this.carToEdit) {
@@ -42,7 +46,11 @@ export class CarModalComponent implements OnInit {
     }
   }
 
-  save(): void {
+  async save(): Promise<void> {
+    if (this.saving) {
+      return;
+    }
+
     const { brand, model, manufactureYear, engineCapacity } = this.car;
 
     if (!brand.trim() || brand.trim().length > 255) {
@@ -85,11 +93,32 @@ export class CarModalComponent implements OnInit {
 
     this.calculateTax();
 
-    this.activeModal.close({
-      ...this.car,
+    const payload = {
       brand: brand.trim(),
       model: model.trim(),
-    });
+      manufactureYear,
+      engineCapacity,
+      tax: this.car.tax,
+    };
+
+    this.saving = true;
+
+    try {
+      if (this.carToEdit) {
+        await axios.put(`/api/cars/${this.carToEdit.id}`, payload);
+      } else {
+        await axios.post('/api/cars', payload);
+      }
+    } catch (error) {
+      console.error('Failed to save car:', error);
+      this.toastr.error('Eroare la salvarea mașinii.');
+      return;
+    } finally {
+      this.saving = false;
+    }
+
+    this.toastr.success('Mașina a fost salvată.');
+    this.activeModal.close();
   }
 
   constructor(

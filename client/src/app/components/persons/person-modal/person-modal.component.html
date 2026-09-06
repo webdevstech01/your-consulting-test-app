@@ -5,72 +5,124 @@
 </div>
 
 <div class="modal-body">
-  <div class="row">
-    <label for="person-last-name" class="col-3 control-label"> Nume* </label>
-    <div class="col-9">
-      <input
-        id="person-last-name"
-        class="form-control"
-        placeholder="Nume..."
-        maxlength="255"
-        [(ngModel)]="person.lastName"
-      />
+  <fieldset [disabled]="saving">
+    <div class="row">
+      <label for="person-last-name" class="col-3 control-label"> Nume* </label>
+      <div class="col-9">
+        <input
+          id="person-last-name"
+          class="form-control"
+          placeholder="Nume..."
+          maxlength="255"
+          [(ngModel)]="person.lastName"
+        />
+      </div>
     </div>
-  </div>
 
-  <div class="row">
-    <label for="person-first-name" class="col-3 control-label">
-      Prenume*
-    </label>
-    <div class="col-9">
-      <input
-        id="person-first-name"
-        class="form-control"
-        placeholder="Prenume..."
-        maxlength="255"
-        [(ngModel)]="person.firstName"
-      />
+    <div class="row">
+      <label for="person-first-name" class="col-3 control-label">
+        Prenume*
+      </label>
+      <div class="col-9">
+        <input
+          id="person-first-name"
+          class="form-control"
+          placeholder="Prenume..."
+          maxlength="255"
+          [(ngModel)]="person.firstName"
+        />
+      </div>
     </div>
-  </div>
 
-  <div class="row">
-    <label for="person-cnp" class="col-3 control-label">CNP*</label>
-    <div class="col-9">
-      <input
-        id="person-cnp"
-        type="text"
-        inputmode="numeric"
-        class="form-control"
-        placeholder="CNP..."
-        maxlength="13"
-        [(ngModel)]="person.cnp"
-        (ngModelChange)="calculateAge()"
-      />
+    <div class="row">
+      <label for="person-cnp" class="col-3 control-label">CNP*</label>
+      <div class="col-9">
+        <input
+          id="person-cnp"
+          type="text"
+          inputmode="numeric"
+          class="form-control"
+          placeholder="CNP..."
+          maxlength="13"
+          [(ngModel)]="person.cnp"
+          (ngModelChange)="calculateAge()"
+        />
+      </div>
     </div>
-  </div>
 
-  <div class="row">
-    <label for="person-age" class="col-3 control-label">Vârsta*</label>
-    <div class="col-4">
-      <input
-        id="person-age"
-        type="number"
-        class="form-control"
-        placeholder="Calculată automat"
-        [ngModel]="person.age"
-        readonly
-      />
+    <div class="row">
+      <label for="person-age" class="col-3 control-label">Vârsta*</label>
+      <div class="col-4">
+        <input
+          id="person-age"
+          type="number"
+          class="form-control"
+          placeholder="Calculată automat"
+          [ngModel]="person.age"
+          readonly
+        />
+      </div>
     </div>
-  </div>
+
+    <div class="row">
+      <label for="person-cars" class="col-3 control-label"> Mașini* </label>
+
+      <div class="col-9">
+        <ng-select
+          labelForId="person-cars"
+          [items]="availableCars"
+          bindLabel="label"
+          bindValue="id"
+          [multiple]="true"
+          [closeOnSelect]="false"
+          appendTo="body"
+          placeholder="Selectați mașinile..."
+          [(ngModel)]="selectedCarIds"
+          [disabled]="saving || loadingCars || carsLoadFailed"
+          [loading]="loadingCars"
+        >
+          <div *ngIf="carsLoadFailed" class="mt-2">
+            <span class="text-danger"
+              >Lista mașinilor nu a putut fi încărcată.</span
+            >
+
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm ms-2"
+              (click)="loadCars()"
+            >
+              Reîncearcă
+            </button>
+          </div>
+
+          <div
+            *ngIf="!loadingCars && !carsLoadFailed && !availableCars.length"
+            class="text-muted mt-2"
+          >
+            Nu există mașini disponibile. Adăugați o mașină din pagina Mașini.
+          </div>
+        </ng-select>
+      </div>
+    </div>
+  </fieldset>
 </div>
 
 <div class="modal-footer">
-  <button type="button" class="btn btn-success" (click)="save()">
-    Salvează
+  <button
+    type="button"
+    class="btn btn-success"
+    [disabled]="
+      saving || loadingCars || carsLoadFailed || !availableCars.length
+    "
+    (click)="save()"
+  >
+    {{ saving ? "Se salvează..." : "Salvează" }}
   </button>
+
   <button
     type="button"
     class="btn btn-outline-secondary"
+    [disabled]="saving"
     (click)="activeModal.dismiss()"
   >
     Renunță

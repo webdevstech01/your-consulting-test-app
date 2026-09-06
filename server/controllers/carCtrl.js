@@ -1,15 +1,70 @@
+const { Op } = require("sequelize");
+
 module.exports = (db) => {
   return {
     findAll: async (req, res) => {
       try {
+        const {
+          brand = "",
+          model = "",
+          manufactureYear = "",
+          engineCapacity = "",
+          tax = "",
+        } = req.query;
+
+        const values = [brand, model, manufactureYear, engineCapacity, tax];
+
+        if (!values.every((value) => typeof value === "string")) {
+          return res.status(400).json({
+            message: "Filtrele trebuie să fie texte.",
+          });
+        }
+
+        const where = {};
+
+        const contains = (value) =>
+          `%${value.trim().replace(/[\\%_]/g, "\\$&")}%`;
+
+        if (brand.trim()) {
+          where.brand = { [Op.iLike]: contains(brand) };
+        }
+
+        if (model.trim()) {
+          where.model = { [Op.iLike]: contains(model) };
+        }
+
+        const numericFilters = {
+          manufactureYear,
+          engineCapacity,
+          tax,
+        };
+
+        for (const [field, value] of Object.entries(numericFilters)) {
+          const search = value.trim();
+
+          if (!search) {
+            continue;
+          }
+
+          if (!/^\d{1,4}$/.test(search)) {
+            return res.status(400).json({
+              message: "Filtrele numerice trebuie să conțină maximum 4 cifre.",
+            });
+          }
+
+          where[field] = Number(search);
+        }
+
         const cars = await db.models.Car.findAll({
+          where,
           order: [["id", "ASC"]],
         });
 
-        res.json(cars);
+        return res.json(cars);
       } catch (error) {
         console.error("Failed to fetch cars:", error);
-        res.status(500).json({
+
+        return res.status(500).json({
           message: "Eroare la preluarea mașinilor.",
         });
       }
