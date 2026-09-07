@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import axios from 'axios';
 import { ToastrService } from 'ngx-toastr';
-import { faPlus, faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { SET_HEIGHT } from 'src/app/utils/utils-table';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PersonModalComponent } from './person-modal/person-modal.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
+import { TableColumn } from '../shared/data-table/data-table.component';
 
 interface Person {
   id: number;
@@ -40,12 +41,61 @@ export class PersonsComponent implements OnInit, OnDestroy {
     age: '',
   };
 
+  columns: TableColumn[] = [
+    {
+      key: 'number',
+      label: 'Nr. Crt.',
+      width: '60px',
+      type: 'number',
+      center: true,
+    },
+    {
+      key: 'lastName',
+      label: 'Nume',
+      width: '180px',
+    },
+    {
+      key: 'firstName',
+      label: 'Prenume',
+      width: '180px',
+    },
+    {
+      key: 'cnp',
+      label: 'CNP',
+      width: '150px',
+      center: true,
+    },
+    {
+      key: 'age',
+      label: 'Vârsta',
+      width: '70px',
+      center: true,
+    },
+    {
+      key: 'cars',
+      label: 'Mașini în proprietate',
+      type: 'custom',
+    },
+    {
+      key: 'edit',
+      label: '',
+      width: '35px',
+      type: 'edit',
+      center: true,
+    },
+    {
+      key: 'delete',
+      label: '',
+      width: '35px',
+      type: 'delete',
+      center: true,
+    },
+  ];
+
   private filterTimer?: ReturnType<typeof setTimeout>;
   private requestVersion = 0;
 
   faPlus = faPlus;
-  faEdit = faEdit;
-  faTrashAlt = faTrashAlt;
 
   constructor(
     private toastr: ToastrService,
@@ -53,7 +103,6 @@ export class PersonsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    SET_HEIGHT('view', 20, 'height');
     void this.loadPersons();
   }
 

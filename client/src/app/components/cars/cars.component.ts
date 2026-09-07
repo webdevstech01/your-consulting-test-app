@@ -1,16 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CarModalComponent } from './car-modal/car-modal.component';
-import {
-  faPlus,
-  faEdit,
-  faTrashAlt,
-  faChevronUp,
-} from '@fortawesome/free-solid-svg-icons';
-import { SCROLL_TOP, SET_HEIGHT } from 'src/app/utils/utils-table';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import axios from 'axios';
 import { ToastrService } from 'ngx-toastr';
+import { TableColumn } from '../shared/data-table/data-table.component';
 
 interface Car {
   id: number;
@@ -28,11 +23,6 @@ interface Car {
 })
 export class CarsComponent implements OnInit, OnDestroy {
   faPlus = faPlus;
-  faEdit = faEdit;
-  faTrashAlt = faTrashAlt;
-  faChevronUp = faChevronUp;
-  limit = 70;
-  showBackTop = false;
 
   filters = {
     brand: '',
@@ -45,12 +35,55 @@ export class CarsComponent implements OnInit, OnDestroy {
   private filterTimer?: ReturnType<typeof setTimeout>;
   private requestVersion = 0;
 
+  columns: TableColumn[] = [
+    {
+      key: 'number',
+      label: 'Nr. Crt.',
+      width: '60px',
+      type: 'number',
+      center: true,
+    },
+    { key: 'brand', label: 'Marcă' },
+    { key: 'model', label: 'Model' },
+    {
+      key: 'manufactureYear',
+      label: 'Anul fabricației',
+      width: '120px',
+      center: true,
+    },
+    {
+      key: 'engineCapacity',
+      label: 'Capacitate cilindrică',
+      width: '160px',
+      suffix: ' cm³',
+      center: true,
+    },
+    {
+      key: 'tax',
+      label: 'Taxă de impozit',
+      width: '120px',
+      suffix: ' lei',
+      center: true,
+    },
+    {
+      key: 'edit',
+      label: '',
+      width: '35px',
+      type: 'edit',
+      center: true,
+    },
+    {
+      key: 'delete',
+      label: '',
+      width: '35px',
+      type: 'delete',
+      center: true,
+    },
+  ];
+
   onFiltersChange(): void {
     clearTimeout(this.filterTimer);
     this.requestVersion++;
-
-    this.onScrollTop();
-    this.showBackTop = false;
 
     this.filterTimer = setTimeout(() => {
       void this.loadCars();
@@ -64,27 +97,12 @@ export class CarsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    SET_HEIGHT('view', 20, 'height');
     void this.loadCars();
   }
 
   ngOnDestroy(): void {
     clearTimeout(this.filterTimer);
     this.requestVersion++;
-  }
-
-  showTopButton(): void {
-    const view = document.getElementsByClassName('view-scroll-cars')[0];
-    this.showBackTop = !!view && view.scrollTop > 500;
-  }
-
-  onScrollDown(): void {
-    this.limit += 20;
-  }
-
-  onScrollTop(): void {
-    SCROLL_TOP('view-scroll-cars', 0);
-    this.limit = 70;
   }
 
   async loadCars(): Promise<void> {

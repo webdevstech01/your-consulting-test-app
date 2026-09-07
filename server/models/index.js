@@ -70,15 +70,6 @@ module.exports = async function getModels(sequelize, Sequelize) {
     }
   }
 
-  // if (syncTables.length && process.env.RUN_CRON === "true") {
-  //   _.each(syncTables, (file) => {
-  //     console.info(file);
-  //     file.sync({ alter: true, logging: false });
-  //   });
-  // }
-
-  // return sequelize;
-
   const { Person, Car, Junction } = sequelize.models;
 
   Person.belongsToMany(Car, {

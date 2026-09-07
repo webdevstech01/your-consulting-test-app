@@ -81,4 +81,11 @@
     justify-content: flex-start;
     align-items: center;
   }
+
+  a.active-link {
+  color: #337ab7;
+  font-weight: bold;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
 }

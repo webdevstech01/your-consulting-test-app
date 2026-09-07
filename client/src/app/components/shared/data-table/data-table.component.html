@@ -1,0 +1,108 @@
+<div class="position-relative">
+  <div
+    id="view"
+    class="data-table-scroll view-scroll-table"
+    [attr.aria-busy]="loading"
+    infiniteScroll
+    [scrollWindow]="false"
+    [infiniteScrollDistance]="2"
+    [infiniteScrollThrottle]="30"
+    (scroll)="showTopButton()"
+    (scrolled)="onScrollDown()"
+  >
+    <table class="table table-hover table-striped table-bordered font-14 p-0">
+      <colgroup>
+        <col *ngFor="let column of columns" [style.width]="column.width" />
+      </colgroup>
+
+      <thead>
+        <tr>
+          <th *ngFor="let column of columns" scope="col">
+            {{ column.label }}
+          </th>
+        </tr>
+
+        <tr *ngIf="filterTemplate">
+          <ng-container [ngTemplateOutlet]="filterTemplate"> </ng-container>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngIf="loading">
+          <td [attr.colspan]="columns.length" class="text-center">
+            Se încarcă...
+          </td>
+        </tr>
+
+        <ng-container *ngIf="!loading">
+          <tr
+            *ngFor="let row of rows.slice(0, limit); let i = index"
+            (dblclick)="editRow.emit(row)"
+          >
+            <td
+              *ngFor="let column of columns"
+              [class.text-center]="column.center"
+              [ngSwitch]="column.type"
+            >
+              <ng-container *ngSwitchCase="'number'">
+                {{ i + 1 }}
+              </ng-container>
+
+              <ng-container *ngSwitchCase="'edit'">
+                <button
+                  type="button"
+                  class="btn btn-link p-0"
+                  aria-label="Modificare"
+                  (click)="editRow.emit(row)"
+                  (dblclick)="$event.stopPropagation()"
+                >
+                  <fa-icon class="text-primary" [icon]="faEdit"></fa-icon>
+                </button>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="'delete'">
+                <button
+                  type="button"
+                  class="btn btn-link p-0"
+                  aria-label="Ștergere"
+                  (click)="deleteRow.emit(row)"
+                  (dblclick)="$event.stopPropagation()"
+                >
+                  <fa-icon class="text-danger" [icon]="faTrashAlt"></fa-icon>
+                </button>
+              </ng-container>
+
+              <ng-container *ngSwitchCase="'custom'">
+                <ng-container
+                  [ngTemplateOutlet]="customCell ?? null"
+                  [ngTemplateOutletContext]="{ $implicit: row, column: column }"
+                >
+                </ng-container>
+              </ng-container>
+
+              <ng-container *ngSwitchDefault>
+                {{ displayValue(row, column) }}
+              </ng-container>
+            </td>
+          </tr>
+
+          <tr *ngIf="!rows.length">
+            <td [attr.colspan]="columns.length" class="text-center fw-bold">
+              {{ emptyMessage }}
+            </td>
+          </tr>
+        </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <button
+    type="button"
+    id="back-top"
+    [class.show]="showBackTop"
+    (click)="onScrollTop()"
+    aria-label="Înapoi sus"
+  >
+    <fa-icon [icon]="faChevronUp"></fa-icon>
+  </button>
+</div>

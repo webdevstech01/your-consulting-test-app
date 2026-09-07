@@ -66,29 +66,37 @@ export class PersonModalComponent implements OnInit {
     const month = Number(cnp.slice(3, 5));
     const day = Number(cnp.slice(5, 7));
 
-    const birthDate = new Date(year, month - 1, day);
-    const today = new Date();
+    const birthDate = new Date(Date.UTC(year, month - 1, day));
 
     if (
-      birthDate.getFullYear() !== year ||
-      birthDate.getMonth() !== month - 1 ||
-      birthDate.getDate() !== day ||
-      birthDate > today
+      birthDate.getUTCFullYear() !== year ||
+      birthDate.getUTCMonth() !== month - 1 ||
+      birthDate.getUTCDate() !== day
     ) {
       return;
     }
 
-    let age = today.getFullYear() - year;
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Bucharest',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(new Date());
 
-    const birthdayHasNotPassed =
-      today.getMonth() < month - 1 ||
-      (today.getMonth() === month - 1 && today.getDate() < day);
+    const getPart = (type: string): number =>
+      Number(parts.find((part) => part.type === type)!.value);
 
-    if (birthdayHasNotPassed) {
+    const currentYear = getPart('year');
+    const currentMonth = getPart('month');
+    const currentDay = getPart('day');
+
+    let age = currentYear - year;
+
+    if (currentMonth < month || (currentMonth === month && currentDay < day)) {
       age--;
     }
 
-    this.person.age = age;
+    this.person.age = age < 0 ? null : age;
   }
 
   async save(): Promise<void> {
@@ -173,7 +181,7 @@ export class PersonModalComponent implements OnInit {
     try {
       const response =
         await axios.get<{ id: number; brand: string; model: string }[]>(
-          '/api/caars',
+          '/api/cars',
         );
 
       this.availableCars = response.data.map((car) => ({

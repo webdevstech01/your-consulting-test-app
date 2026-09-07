@@ -20,6 +20,7 @@ import { PersonsComponent } from './components/persons/persons.component';
 import { CarsComponent } from './components/cars/cars.component';
 import { CarModalComponent } from './components/cars/car-modal/car-modal.component';
 import { PersonModalComponent } from './components/persons/person-modal/person-modal.component';
+import { DataTableComponent } from './components/shared/data-table/data-table.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { PersonModalComponent } from './components/persons/person-modal/person-m
     PersonsComponent,
     CarsComponent,
     CarModalComponent,
-    PersonModalComponent
+    PersonModalComponent,
+    DataTableComponent
   ],
   imports: [
     BrowserModule,
