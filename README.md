@@ -85,6 +85,7 @@
 - Filtrarea este realizată în backend și nu modifică datele din baza de date. Filtrele se păstrează după adăugare, modificare și ștergere, dar se resetează la schimbarea paginii sau reîncărcarea browserului.
 - Tabelele Persoane și Mașini folosesc o componentă reutilizabilă, care păstrează utilitarele existente pentru derulare și ajustarea înălțimii.
 - Dacă salvarea eșuează, modalul rămâne deschis și păstrează datele introduse, pentru a permite reîncercarea.
+- În modalul de persoană, dacă încărcarea listei de mașini eșuează, se afișează un mesaj și butonul „Reîncearcă”. Dacă nu există mașini disponibile, utilizatorul este îndrumat să adauge una din pagina Mașini. Salvarea este dezactivată până când lista este încărcată cu succes și conține mașini.
 
 ### Cerintele temei
 
