@@ -81,27 +81,27 @@
           [disabled]="saving || loadingCars || carsLoadFailed"
           [loading]="loadingCars"
         >
-          <div *ngIf="carsLoadFailed" class="mt-2">
-            <span class="text-danger"
-              >Lista mașinilor nu a putut fi încărcată.</span
-            >
-
-            <button
-              type="button"
-              class="btn btn-outline-secondary btn-sm ms-2"
-              (click)="loadCars()"
-            >
-              Reîncearcă
-            </button>
-          </div>
-
-          <div
-            *ngIf="!loadingCars && !carsLoadFailed && !availableCars.length"
-            class="text-muted mt-2"
-          >
-            Nu există mașini disponibile. Adăugați o mașină din pagina Mașini.
-          </div>
         </ng-select>
+        <div *ngIf="carsLoadFailed" class="mt-4">
+          <span class="text-danger"
+            >Lista mașinilor nu a putut fi încărcată.</span
+          >
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-sm ms-2"
+            (click)="loadCars()"
+          >
+            Reîncearcă
+          </button>
+        </div>
+
+        <div
+          *ngIf="!loadingCars && !carsLoadFailed && !availableCars.length"
+          class="text-muted mt-4"
+        >
+          Nu există mașini disponibile. Adăugați o mașină din pagina Mașini.
+        </div>
       </div>
     </div>
   </fieldset>

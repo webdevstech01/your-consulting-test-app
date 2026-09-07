@@ -6,6 +6,7 @@ import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.compone
 import axios from 'axios';
 import { ToastrService } from 'ngx-toastr';
 import { TableColumn } from '../shared/data-table/data-table.component';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 interface Car {
   id: number;
@@ -94,6 +95,7 @@ export class CarsComponent implements OnInit, OnDestroy {
   constructor(
     private modalService: NgbModal,
     private toastr: ToastrService,
+    private spinner: NgxSpinnerService,
   ) {}
 
   ngOnInit(): void {
@@ -103,10 +105,12 @@ export class CarsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     clearTimeout(this.filterTimer);
     this.requestVersion++;
+    void this.spinner.hide();
   }
 
   async loadCars(): Promise<void> {
     const version = ++this.requestVersion;
+    void this.spinner.show();
 
     try {
       const response = await axios.get<Car[]>('/api/cars', {
@@ -125,6 +129,10 @@ export class CarsComponent implements OnInit, OnDestroy {
 
       console.error('Failed to fetch cars:', error);
       this.toastr.error('Eroare la preluarea mașinilor.');
+    } finally {
+      if (version === this.requestVersion) {
+        void this.spinner.hide();
+      }
     }
   }
 

@@ -2,11 +2,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import axios from 'axios';
 import { ToastrService } from 'ngx-toastr';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import { SET_HEIGHT } from 'src/app/utils/utils-table';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PersonModalComponent } from './person-modal/person-modal.component';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { TableColumn } from '../shared/data-table/data-table.component';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 interface Person {
   id: number;
@@ -100,6 +100,7 @@ export class PersonsComponent implements OnInit, OnDestroy {
   constructor(
     private toastr: ToastrService,
     private modalService: NgbModal,
+    private spinner: NgxSpinnerService,
   ) {}
 
   ngOnInit(): void {
@@ -109,6 +110,7 @@ export class PersonsComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     clearTimeout(this.filterTimer);
     this.requestVersion++;
+    void this.spinner.hide();
   }
 
   onFiltersChange(): void {
@@ -123,6 +125,7 @@ export class PersonsComponent implements OnInit, OnDestroy {
 
   async loadPersons(): Promise<void> {
     const version = ++this.requestVersion;
+    void this.spinner.show();
 
     try {
       const response = await axios.get<Person[]>('/api/persons', {
@@ -141,6 +144,10 @@ export class PersonsComponent implements OnInit, OnDestroy {
 
       console.error('Failed to fetch persons:', error);
       this.toastr.error('Eroare la preluarea persoanelor.');
+    } finally {
+      if (version === this.requestVersion) {
+        void this.spinner.hide();
+      }
     }
   }
 

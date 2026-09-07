@@ -1,35 +1,38 @@
 # test-app
-## *Prerequisites*
-* Make sure you have NodeJS globally installed, if not go to https://nodejs.org/en/download/ and download the latest version
-* Install WINDOWS REDIS
-  * Open this github link - https://github.com/zkteco-home/redis-windows/releases/tag/redis7.0.5
-  * Download and run redis-server.exe
-* Install PostgreSQL on local machine
-  * Go to https://www.postgresql.org/download/windows/
-  * Click on download the installer
-  * Follow the default installation steps
-  * Make sure to remember / note the master password
-  * Leave the default 5432 port
-* Install PGAdmin on local machine
-  * Go to https://www.pgadmin.org/download/pgadmin-4-windows/
-  * Download and install the lastest version of PGAdmin 4
-  * Make sure to remember / note the credentials asked for authentication
 
-## * Server setup *
-* Setup .env file with following settings:
+## _Prerequisites_
+
+- Make sure you have NodeJS globally installed, if not go to https://nodejs.org/en/download/ and download the latest version
+- Install WINDOWS REDIS
+  - Open this github link - https://github.com/zkteco-home/redis-windows/releases/tag/redis7.0.5
+  - Download and run redis-server.exe
+- Install PostgreSQL on local machine
+  - Go to https://www.postgresql.org/download/windows/
+  - Click on download the installer
+  - Follow the default installation steps
+  - Make sure to remember / note the master password
+  - Leave the default 5432 port
+- Install PGAdmin on local machine
+  - Go to https://www.pgadmin.org/download/pgadmin-4-windows/
+  - Download and install the lastest version of PGAdmin 4
+  - Make sure to remember / note the credentials asked for authentication
+
+## _ Server setup _
+
+- Setup .env file with following settings:
   ```
   PORT=8080
   NODE_ENV=dev
   DATABASE_URL=postgres://postgres:POSTGRES_PASSWORD@localhost:5432/persons
   RUN_CRON=true
   ```
-* In .env file make sure to replace POSTGRESQL_PASSWORD with the password you set up on PostgreSQL installation
-* Install globally nodemon
-  * npm install nodemon@2.0.7 -g
-* In the root folder
-  * Execute the command npm install (all server dependencies should install successfully)
-  * Execute the command nodemon
-  * If everything is ok, you should see in the console the following message:
+- In .env file make sure to replace POSTGRESQL_PASSWORD with the password you set up on PostgreSQL installation
+- Install globally nodemon
+  - npm install nodemon@2.0.7 -g
+- In the root folder
+  - Execute the command npm install (all server dependencies should install successfully)
+  - Execute the command nodemon
+  - If everything is ok, you should see in the console the following message:
   ```javascript
     λ nodemon
     [nodemon] 2.0.7
@@ -41,13 +44,15 @@
     Listening on port: 8080, env: dev
   ```
 
-## *Client setup *
-* Install angular cli globally
-  * npm install -g @angular/cli
-* Navigate to project/client
-  * Execute the command npm install (all client dependencies should install successfully)
-  * In the same client folder, execute the command npm start
-  * If everything is ok, you should see in the console the following message:
+## _Client setup _
+
+- Install angular cli globally
+  - npm install -g @angular/cli
+- Navigate to project/client
+  - Execute the command npm install (all client dependencies should install successfully)
+  - In the same client folder, execute the command npm start
+  - If everything is ok, you should see in the console the following message:
+
   ```javascript
     λ npm start
 
@@ -73,82 +78,105 @@
     √ Compiled successfully.
   ```
 
+### Note de implementare
+
+- La adăugarea sau modificarea unei persoane, este obligatorie selectarea a cel puțin unei mașini. Ștergerea unei mașini din pagina Mașini poate lăsa persoanele asociate fără mașini.
+- Vârsta este calculată automat din CNP și recalculată la citirea datelor din backend, folosind data curentă din fusul orar **Europe/Bucharest**. Calculul acceptă CNP-uri cu prefixele **1–6** și verifică data nașterii, fără verificarea cifrei de control.
+- Filtrarea este realizată în backend și nu modifică datele din baza de date. Filtrele se păstrează după adăugare, modificare și ștergere, dar se resetează la schimbarea paginii sau reîncărcarea browserului.
+- Tabelele Persoane și Mașini folosesc o componentă reutilizabilă, care păstrează utilitarele existente pentru derulare și ajustarea înălțimii.
+- Dacă salvarea eșuează, modalul rămâne deschis și păstrează datele introduse, pentru a permite reîncercarea.
+
 ### Cerintele temei
-#### *FRONT END*
+
+#### _FRONT END_
+
 1. Acceași funcționalitate ca în aplicația creată
 1. Se vor crea in header 2 taguri html - Persoane, Mașini
 1. Se vor crea 2 componente în folderul components Persoane, Mașini
 1. Fiecare link trebuie să folosească routerLink pentru a ajunge la componenta respectivă
 1. Fiecare componentă va conține următoarele
-  * Titlul componentei
-  * Tabelul cu informații
-  * Butonul de adaugă
-  * Modalul pentru adăugare / modificare
+
+- Titlul componentei
+- Tabelul cu informații
+- Butonul de adaugă
+- Modalul pentru adăugare / modificare
+
 ### Componenta persoane
+
 1. Un tabel ce va conține următoarele coloane
-  * Număr curent
-  * Nume / prenume
-  * CNP
-  * Vârsta
-  * Lista mașinilor aflate în proprietate
-    * Denumire marcă / denumire model
-    * Anul fabricației
-    * Capacitatea cilindrică
-    * Taxa de impozit
-  * 2 iconițe pe tabel pentru modificare / ștergere
-  * Modificarea persoanei se va realiza pe același modal
-  * După ce persoana a fost ștearsă din baza de data, tabelul trebuie reîmprospătat
+
+- Număr curent
+- Nume / prenume
+- CNP
+- Vârsta
+- Lista mașinilor aflate în proprietate
+  - Denumire marcă / denumire model
+  - Anul fabricației
+  - Capacitatea cilindrică
+  - Taxa de impozit
+- 2 iconițe pe tabel pentru modificare / ștergere
+- Modificarea persoanei se va realiza pe același modal
+- După ce persoana a fost ștearsă din baza de data, tabelul trebuie reîmprospătat
+
 2. La apăsarea butonului adaugă se va deschide modalul ce va conține următoarele
-  * Câmpuri
-    * Nume* - string, maxlength 255
-    * Prenume* - string, maxlength 255
-    * CNP* - string, maxlength 13
-    * Vârsta* - integer, maxlength 3
-    * Select multiplu (ng-select multiple) pentru mașini
-  * Funcționalitate
-    * Vârsta va fi calculată automat din CNP
-    * Câmpurile sunt obligatorii
-    * Validare și afișare mesaj cu denumirea câmpului ce nu a fost completat
-    * La apăsarea butonului adaugă, persoana va fi salvată în baza de date
-    * La apăsarea butonului renunță, modalul se va inchide fără a fi făcută salvarea
-    * După ce persoana a fost salvată, tabelul trebuie să conțină noua persoană
-    * Filtrare pe tabel (sa se pastreze datele liniilor filtrate)
+
+- Câmpuri
+  - Nume\* - string, maxlength 255
+  - Prenume\* - string, maxlength 255
+  - CNP\* - string, maxlength 13
+  - Vârsta\* - integer, maxlength 3
+  - Select multiplu (ng-select multiple) pentru mașini
+- Funcționalitate
+  - Vârsta va fi calculată automat din CNP
+  - Câmpurile sunt obligatorii
+  - Validare și afișare mesaj cu denumirea câmpului ce nu a fost completat
+  - La apăsarea butonului adaugă, persoana va fi salvată în baza de date
+  - La apăsarea butonului renunță, modalul se va inchide fără a fi făcută salvarea
+  - După ce persoana a fost salvată, tabelul trebuie să conțină noua persoană
+  - Filtrare pe tabel (sa se pastreze datele liniilor filtrate)
 
 ### Componenta mașini
-1. Un tabel ce va conține următoarele coloane
-  * Număr curent
-  * Denumire marcă
-  * Denumire model
-  * Anul fabricației
-  * Capacitatea cilindrică
-  * Taxa de impozit
-  * 2 iconițe pe tabel pentru modificare / ștergere
-  * Modificarea mașinii se va realiza pe același modal
-  * După ce mașina a fost ștearsă din baza de data, tabelul trebuie reîmprospătat
-2. La apăsarea butonului adaugă se va deschide modalul ce va conține următoarele
-  * Câmpuri
-    * Denumire marcă - string, maxlength 255
-    * Denumire model - string, maxlength 255
-    * Anul fabricației - integer, maxlength 4
-    * Capacitatea cilindrică - integer, maxlength 4
-    * Taxa de impozit - integer, maxlength 4
-  * Funcționalitate
-    * Taxa de impozit va fi calculată conform calcului
-      * capacitatea cilindrică < 1500 = 50 lei
-      * capacitatea cilindrică > 1500 < 2000 = 100 lei
-      * capacitatea cilindrică > 2000 = 200 lei
-    * Câmpurile sunt obligatorii
-    * Validare și afișare mesaj cu denumirea câmpului ce nu a fost completat
-    * La apăsarea butonului adaugă, mașina va fi salvată în baza de date
-    * La apăsarea butonului renunță, modalul se va inchide fără a fi făcută salvarea
-    * După ce mașina a fost salvată, tabelul trebuie să conțină noua mașină
-    * Filtrare pe tabel (sa se pastreze datele liniilor filtrate)
 
-#### *BACK END*
+1. Un tabel ce va conține următoarele coloane
+
+- Număr curent
+- Denumire marcă
+- Denumire model
+- Anul fabricației
+- Capacitatea cilindrică
+- Taxa de impozit
+- 2 iconițe pe tabel pentru modificare / ștergere
+- Modificarea mașinii se va realiza pe același modal
+- După ce mașina a fost ștearsă din baza de data, tabelul trebuie reîmprospătat
+
+2. La apăsarea butonului adaugă se va deschide modalul ce va conține următoarele
+
+- Câmpuri
+  - Denumire marcă - string, maxlength 255
+  - Denumire model - string, maxlength 255
+  - Anul fabricației - integer, maxlength 4
+  - Capacitatea cilindrică - integer, maxlength 4
+  - Taxa de impozit - integer, maxlength 4
+- Funcționalitate
+  - Taxa de impozit va fi calculată conform calcului
+    - capacitatea cilindrică < 1500 = 50 lei
+    - capacitatea cilindrică > 1500 < 2000 = 100 lei
+    - capacitatea cilindrică > 2000 = 200 lei
+  - Câmpurile sunt obligatorii
+  - Validare și afișare mesaj cu denumirea câmpului ce nu a fost completat
+  - La apăsarea butonului adaugă, mașina va fi salvată în baza de date
+  - La apăsarea butonului renunță, modalul se va inchide fără a fi făcută salvarea
+  - După ce mașina a fost salvată, tabelul trebuie să conțină noua mașină
+  - Filtrare pe tabel (sa se pastreze datele liniilor filtrate)
+
+#### _BACK END_
+
 1. Create / update / find / findAll / destroy în tabelul Person
 1. Create / update / find / findAll / destroy în tabelul Car
 1. Creare tabel de joncțiune "Junction" cu următoarele coloane
-  * id_person, id_car
+
+- id_person, id_car
+
 4. La ștergerea unei persoane, se vor șterge toate liniile din tabelul de joncțiune aferente persoanei șterse
 5. La ștergerea unei mașini, se vor șterge toate liniile din tabelul de joncțiune aferente mașinii șterse
 6. La ștergerea unei mașini din modalul de persoană, se va șterge doar lini din joncțiune aferentă persoanei
